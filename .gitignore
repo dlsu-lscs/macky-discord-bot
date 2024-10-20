@@ -1,0 +1,7 @@
+*.tmp
+.DS_Store
+build/
+raw/
+node_modules/
+.env
+
