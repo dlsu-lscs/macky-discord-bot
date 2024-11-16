@@ -6,18 +6,29 @@ const { EmbedBuilder } = require('discord.js')
 const isVowel = require('is-vowel')
 const router = express.Router();
 
+
+const add_roles_to_guild = async (guild, hashmap, memberDataId) => {
+  // - if inside dict, set it to that.
+  let role = "Member"
+  if (hashmap.hasOwnProperty(memberDataId)){
+    role = guild.roles.cache.find(r => r.name === hashmap[memberDataId])
+  } 
+
+  await member.roles.add(role);
+}
+
 const verify = async (req, res) => {
   console.log('verifying ' + req.params.id)
   try {
     const ver_id = req.params.id;
 
-    const ver = await Verifying.findOneAndUpdate({ _id: ver_id, status: { $ne: 'done' } },
-      {
-        status: 'done'
-      }
+    const ver = await Verifying.findOneAndUpdate(
+      { _id: ver_id, status: { $ne: 'done' } }, 
+      { status: 'done' }
     ).exec();
 
-    if (ver == undefined) return res.send('You are already verified. Open up discord!');
+    if (ver == undefined) 
+      return res.send('You are already verified. Open up discord!');
 
     await User({
       discord_id: ver.user_id,
@@ -33,61 +44,49 @@ const verify = async (req, res) => {
       JOIN divisions  d ON c.division_id  = d.division_id
       WHERE m.email = '${ver.email}'
     `)
+
     const memberData = result[0]
     console.log(memberData)
-
     console.log('req.body')
     // console.log(req.discord_client.guilds.cache);
     const guild = await req.discord_client.guilds.cache.get(process.env.GUILD_ID);
     const member = await guild.members.fetch(ver.user_id);
+    
+    const add_roles = (dict, memberId) => add_roles_to_guild(guild, dict, memberId)
 
     // - setup officer role
-    let role = guild.roles.cache.find(r => r.name === "Member");
-    if (memberData.position_id === "EVP" || memberData.position_id === "PRES") {
-      role = guild.roles.cache.find(r => r.name === "Core");
-    } else if (memberData.position_id === "CT" || memberData.position_id === "AVP") {
-      role = guild.roles.cache.find(r => r.name === "Officer");
-    } else if (memberData.position_id === "VP") {
-      role = guild.roles.cache.find(r => r.name === "Executive Board");
-    } else if (memberData.position_id === "JO") {
-      role = guild.roles.cache.find(r => r.name === "Junior Officer");
+    let officer_id_to_name = {
+       "EVP"   : "Core"
+      ,"PRES"  : "Core"
+      ,"VP"    : "Executive Board"
+      ,"CT"    : "Officer"
+      ,"AVP"   : "Officer"
+      ,"JO"    : "Junior Officer"
     }
-    await member.roles.add(role);
+    add_roles(officer_id_to_name, memberData.position_id)    
 
     // - setup officer committee
-    // role = guild.roles.cache.find(r => r.name === "Member");
-    if (memberData.committee_id === "RND") {
-      role = guild.roles.cache.find(r => r.name === "Research and Development");
-    } else if (memberData.committee_id === "HRD") {
-      role = guild.roles.cache.find(r => r.name === "Human Resource Development");
-    } else if (memberData.committee_id === "TND") {
-      role = guild.roles.cache.find(r => r.name === "Training and Development");
-    } else if (memberData.committee_id === "ACADS") {
-      role = guild.roles.cache.find(r => r.name === "Academics");
-    } else if (memberData.committee_id === "CORPREL") {
-      role = guild.roles.cache.find(r => r.name === "Corporate Relations");
-    } else if (memberData.committee_id === "PUBS") {
-      role = guild.roles.cache.find(r => r.name === "Publicity and Creatives");
-    } else if (memberData.committee_id === "SOCIOCIVIC") {
-      role = guild.roles.cache.find(r => r.name === "Socio-Civic");
-    } else if (memberData.committee_id === "UNIVREL") {
-      role = guild.roles.cache.find(r => r.name === "University Relations");
-    } else if (memberData.committee_id === "DOCULOGI") {
-      role = guild.roles.cache.find(r => r.name === "Documentation and Logistics");
-    } else if (memberData.committee_id === "FIN") {
-      role = guild.roles.cache.find(r => r.name === "Finance");
+    let committee_id_to_name = {
+       "RND"         : "Research and Development"
+      ,"HRD"         : "Human Resource Development"
+      ,"TND"         : "Training and Development"
+      ,"ACADS"       : "Academics"
+      ,"CORPREL"     : "Corporate Relations"
+      ,"PUBS"        : "Publicity and Creatives"
+      ,"SOCIOCIVIC"  : "Socio-Civic"
+      ,"UNIVREL"     : "University Relations"
+      ,"DOCULOGI"    : "Documentation and Logistics"
+      ,"FIN"         : "Finance"
     }
-    await member.roles.add(role);
+    add_roles(committee_id_to_name, memberData.committee_id)
 
     // - setup officer division
-    if (memberData.divison_id === "OPS") {
-      role = guild.roles.cache.find(r => r.name === "Operations")
-    } else if (memberData.divison_id === "INT") {
-      role = guild.roles.cache.find(r => r.name === "Internals")
-    } if (memberData.divison_id === "EXT") {
-      role = guild.roles.cache.find(r => r.name === "Externals")
+    let division_id_to_name = {
+       "OPS" : "Operations"
+      ,"INT" : "Internals"
+      ,"EXT" : "Externals"
     }
-    await member.roles.add(role);
+    add_roles(division_id_to_name, memberData.division_id)
 
     const embed = new EmbedBuilder()
       .setTitle(`Welcome to LSCScord, ${memberData.nickname}!`)
@@ -99,9 +98,9 @@ const verify = async (req, res) => {
         iconURL: "https://i.imgur.com/rrvsq8o.png",
       });
     await member.send({ embeds: [embed] });
+
     return res.redirect('https://discord.com')
-  }
-  catch (err) {
+  } catch (err) {
     console.error(err)
     return res.send('An error occured while trying to verify you. Please contact sean_robenta@dlsu.edu.ph.');
   }
