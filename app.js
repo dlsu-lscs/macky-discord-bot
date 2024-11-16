@@ -1,10 +1,12 @@
 require("dotenv").config();
+
 const {
     Client,
     GatewayIntentBits,
     Partials,
     Collection,
 } = require("discord.js");
+
 const bot = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -22,6 +24,7 @@ const bot = new Client({
         Partials.GuildMember,
     ],
 });
+
 const fs = require("fs");
 
 bot.commands = new Collection();

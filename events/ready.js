@@ -17,19 +17,31 @@ module.exports = {
             next();
         };
 
+        app.use(express.json());
+
+        app.listen(process.env.PORT, () => {
+            console.log(`Server is running on ${process.env.PORT}`);
+        });
+
+        // Verify
         app.get(
             "/verify/:id",
             passBotInstance,
             require("../controllers/verify")
         );
 
-        app.listen(process.env.PORT, () => {
-            console.log(`Server is running on ${process.env.PORT}`);
-        });
-
-        // Webhook
-        app.get("/webhooks");
-
-        app.post("");
+        // Facebook webhooks
+        app.get(
+            "/webhooks",
+            passBotInstance,
+            require("../controllers/webhook_verification")
+        );
+        app.post(
+            "/webhooks",
+            passBotInstance,
+            require("../controllers/webhook_notification")
+        );
     },
 };
+
+// https://d9c6-175-176-39-176.ngrok-free.app/webhooks

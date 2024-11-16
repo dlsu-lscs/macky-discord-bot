@@ -7,13 +7,13 @@
  */
 const webhook_verification = (req, res) => {
     // Ensure the verify token is correct
-    if ((req.body.hub.verify_token = VERIFY_TOKEN)) {
+    if (req.query["hub.verify_token"] == "tobisawa_misaki") {
         // Respond with the challenge value
-        res.status(200).send(req.body.hub.challenge);
+        res.status(200).send(req.query["hub.challenge"]);
     } else {
         // Bad request
         res.status(400).send();
     }
 };
 
-module.exports = { webhook_verification };
+module.exports = webhook_verification;
