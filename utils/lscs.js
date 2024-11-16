@@ -57,10 +57,10 @@ const sendVerificationEmail = async (member, email) => {
     ).exec()
     console.log('verifation mongo')
     console.log(verifying_user)
+    
     mailer.sendEmail(email, `${process.env.APP_URL}/verify/${verifying_user._id}`)
 
-  }
-  catch (err) { throw err; }
+  } catch (err) { throw err; }
 }
 
 
