@@ -59,20 +59,11 @@ const webhook_notification = (req, res) => {
             }
 
             // The field for one image and multiple images in the requests are different
-            // Array is for sending multiple embeds (one for each photo)
-            let images = [];
             if (Object.hasOwn(change.value, "link")) {
-                // Call setImage() directly instead of pushing to array because there's only one anyway
                 embed.setImage(change.value.link);
             } else if (Object.hasOwn(change.value, "photos")) {
-                for (let photo of change.value.photos) {
-                    // Create a new embed with the same URL as the first then push to array
-                    images.push(
-                        new EmbedBuilder()
-                            .setImage(photo)
-                            .setURL(`https://facebook.com/${entry.id}`)
-                    );
-                }
+                // Only show first image
+                embed.setImage(change.value.photos[0]);
             }
 
             console.log(
@@ -81,8 +72,7 @@ const webhook_notification = (req, res) => {
 
             // Send the message
             channel.send({
-                // Sending multiple embeds with the same URL will combine their images
-                embeds: [embed].concat(images),
+                embeds: [embed],
             });
         }
     }
