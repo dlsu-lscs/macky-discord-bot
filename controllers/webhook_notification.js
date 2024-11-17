@@ -8,15 +8,41 @@ const { EmbedBuilder } = require("discord.js");
  * @see https://developers.facebook.com/docs/graph-api/webhooks/getting-started#event-notifications
  */
 const webhook_notification = (req, res) => {
-    const channel = req.discord_client.channels.cache.get(
-        process.env.CHANNEL_ID
-    );
-    let entries = req.body.entry;
+    const guild = req.discord_client.guilds.cache.get(process.env.GUILD_ID);
+    const channel = guild.channels.cache
+        // I don't know how Discord sorts channels
+        // See https://stackoverflow.com/a/76782585 for a possible solution
+        .sort((a, b) => a.rawPosition > b.rawPosition)
+        // As far as I know find() will stop at the first match
+        .find(
+            (c) =>
+                guild.members.me.permissionsIn(c.id).has("SEND_MESSAGES") &&
+                c.type == 0
+        );
+
+    // Alternative: Get a channel specifically by channel ID
+    // Might be better if Macky won't ever be added to other servers
+    // req.discord_client.channels.cache.get(process.env.CHANNEL_ID);
+
+    // TODO: Verify SHA256 signature in payload
+
+    // Status response code
+    let status = 200;
 
     // Iterate over each entry
-    for (let entry of entries) {
+    let entries = req.body.entry;
+    search: for (let entry of entries) {
         // Iterate over each change
         for (let change of entry.changes) {
+            // Only accept "feed" updates
+            if (change.field != "feed") {
+                console.log(
+                    `[Webhooks] Error: attempted to parse "${change.field}" update`
+                );
+                status = 400;
+                break search;
+            }
+
             // Embed
             let embed = new EmbedBuilder()
                 .setTitle(`${change.value.from.name} made a new post`)
@@ -33,12 +59,14 @@ const webhook_notification = (req, res) => {
             }
 
             // The field for one image and multiple images in the requests are different
+            // Array is for sending multiple embeds (one for each photo)
             let images = [];
             if (Object.hasOwn(change.value, "link")) {
+                // Call setImage() directly instead of pushing to array because there's only one anyway
                 embed.setImage(change.value.link);
             } else if (Object.hasOwn(change.value, "photos")) {
                 for (let photo of change.value.photos) {
-                    // Create a new embed with the same URL as the first
+                    // Create a new embed with the same URL as the first then push to array
                     images.push(
                         new EmbedBuilder()
                             .setImage(photo)
@@ -47,16 +75,19 @@ const webhook_notification = (req, res) => {
                 }
             }
 
+            console.log(
+                `[Webhooks] Received "${change.field}" update (https://facebook.com/${entry.id})`
+            );
+
             // Send the message
             channel.send({
                 // Sending multiple embeds with the same URL will combine their images
                 embeds: [embed].concat(images),
             });
-
-            // TODO: Error handling
-            res.status(200).send();
         }
     }
+
+    res.status(status).send();
 };
 
 module.exports = webhook_notification;
