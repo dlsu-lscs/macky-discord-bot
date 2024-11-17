@@ -9,7 +9,7 @@ const { EmbedBuilder } = require("discord.js");
  */
 const webhook_notification = (req, res) => {
     const channel = req.discord_client.channels.cache.get(
-        "1150781313532559404"
+        process.env.CHANNEL_ID
     );
     let entries = req.body.entry;
 
@@ -20,10 +20,10 @@ const webhook_notification = (req, res) => {
             // Embed
             let embed = new EmbedBuilder()
                 .setTitle(`${change.value.from.name} made a new post`)
-                .setURL(`https://facebook.com/${entry.id}`)
+                .setURL(`https://facebook.com/${change.value.post_id}`)
                 .setFooter({
                     text: new Date(entry.time * 1000).toLocaleTimeString(
-                        "en-PH"
+                        process.env.TIME_LOCALE
                     ),
                 });
 
@@ -35,12 +35,10 @@ const webhook_notification = (req, res) => {
             // The field for one image and multiple images in the requests are different
             let images = [];
             if (Object.hasOwn(change.value, "link")) {
-                console.log("HAS LINK");
                 embed.setImage(change.value.link);
             } else if (Object.hasOwn(change.value, "photos")) {
-                console.log("HAS PHOTOS");
                 for (let photo of change.value.photos) {
-                    console.log(photo);
+                    // Create a new embed with the same URL as the first
                     images.push(
                         new EmbedBuilder()
                             .setImage(photo)
@@ -50,7 +48,10 @@ const webhook_notification = (req, res) => {
             }
 
             // Send the message
-            channel.send({ embeds: [embed].concat(images) });
+            channel.send({
+                // Sending multiple embeds with the same URL will combine their images
+                embeds: [embed].concat(images),
+            });
 
             // TODO: Error handling
             res.status(200).send();
