@@ -8,21 +8,21 @@ const { EmbedBuilder } = require("discord.js");
  * @see https://developers.facebook.com/docs/graph-api/webhooks/getting-started#event-notifications
  */
 const webhook_notification = (req, res) => {
-    const guild = req.discord_client.guilds.cache.get(process.env.GUILD_ID);
-    const channel = guild.channels.cache
-        // I don't know how Discord sorts channels
-        // See https://stackoverflow.com/a/76782585 for a possible solution
-        .sort((a, b) => a.rawPosition > b.rawPosition)
-        // As far as I know find() will stop at the first match
-        .find(
-            (c) =>
-                guild.members.me.permissionsIn(c.id).has("SEND_MESSAGES") &&
-                c.type == 0
-        );
+    // const guild = req.discord_client.guilds.cache.get(process.env.GUILD_ID);
+    // const channel = guild.channels.cache
+    //    // I don't know how Discord sorts channels
+    //    // See https://stackoverflow.com/a/76782585 for a possible solution
+    //    .sort((a, b) => a.rawPosition > b.rawPosition)
+    //    // As far as I know find() will stop at the first match
+    //    .find(
+    //       (c) =>
+    //            guild.members.me.permissionsIn(c.id).has("SEND_MESSAGES") &&
+    //            c.type == 0
+    //    );
 
     // Alternative: Get a channel specifically by channel ID
     // Might be better if Macky won't ever be added to other servers
-    // req.discord_client.channels.cache.get(process.env.CHANNEL_ID);
+    const channel = req.discord_client.channels.cache.get(process.env.CHANNEL_ID);
 
     // TODO: Verify SHA256 signature in payload
 
