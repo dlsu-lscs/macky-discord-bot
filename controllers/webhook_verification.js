@@ -10,7 +10,6 @@ const webhook_verification = (req, res) => {
     if (req.query["hub.verify_token"] == process.env.WEBHOOK_VERIFY_TOKEN) {
         // Respond with the challenge value
         res.status(200).send(req.query["hub.challenge"]);
-        console.log(req.query);
     } else {
         // Bad request
         res.status(400).send();
