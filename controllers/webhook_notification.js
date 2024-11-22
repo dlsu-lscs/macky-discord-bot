@@ -47,7 +47,7 @@ const webhook_notification = (req, res) => {
 
             // Embed
             let embed = new EmbedBuilder()
-                .setTitle(`${change.value.from.name} made a new post`)
+                .setTitle(`La Salle Computer Society on Facebook`)
                 .setURL(`https://facebook.com/${change.value.post_id}`)
                 .setThumbnail("https://i.imgur.com/jVdfC7o.png")
                 .setColor("#abd8ff")
@@ -79,6 +79,7 @@ const webhook_notification = (req, res) => {
 
             // Send the message
             channel.send({
+                content: "@everyone",
                 embeds: [embed],
             });
         }
