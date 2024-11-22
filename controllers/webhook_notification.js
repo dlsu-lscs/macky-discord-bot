@@ -24,8 +24,6 @@ const webhook_notification = (req, res) => {
     // Might be better if Macky won't ever be added to other servers
     const channel = req.discord_client.channels.cache.get(process.env.CHANNEL_ID);
 
-    // TODO: Verify SHA256 signature in payload
-
     // Status response code
     let status = 200;
 
@@ -35,7 +33,7 @@ const webhook_notification = (req, res) => {
         // Iterate over each change
         for (let change of entry.changes) {
             // Only accept "feed" updates with item "status" or "photo" and verb "add"
-            if (change.field != "feed" 
+            if (change.field != "feed"
                 || (change.value.item != "status" && change.value.item != "photo")
                 || change.value.verb != "add") {
                 console.log(
