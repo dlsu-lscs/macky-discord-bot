@@ -34,12 +34,14 @@ const webhook_notification = (req, res) => {
     search: for (let entry of entries) {
         // Iterate over each change
         for (let change of entry.changes) {
-            // Only accept "feed" updates
-            if (change.field != "feed") {
+            // Only accept "feed" updates with item "status" or "photo" and verb "add"
+            if (change.field != "feed" 
+                || (change.value.item != "status" && change.value.item != "photo")
+                || change.value.verb != "add") {
                 console.log(
-                    `[Webhooks] Error: attempted to parse "${change.field}" update`
+                    `[Webhooks] Skipping parsing of "${change.field}" update at https://facebook.com/${change.value.post_id}`
                 );
-                status = 400;
+                status = 200;
                 break search;
             }
 
@@ -47,10 +49,13 @@ const webhook_notification = (req, res) => {
             let embed = new EmbedBuilder()
                 .setTitle(`${change.value.from.name} made a new post`)
                 .setURL(`https://facebook.com/${change.value.post_id}`)
+                .setThumbnail("https://i.imgur.com/jVdfC7o.png")
+                .setColor("#abd8ff")
                 .setFooter({
                     text: new Date(entry.time * 1000).toLocaleTimeString(
                         process.env.TIME_LOCALE
-                    ),
+                    ) + "\n39th La Salle Computer Society Research and Development",
+                    iconURL: "https://i.imgur.com/rrvsq8o.png",
                 });
 
             // Set description iff message field exists
@@ -59,7 +64,9 @@ const webhook_notification = (req, res) => {
             }
 
             // The field for one image and multiple images in the requests are different
-            if (Object.hasOwn(change.value, "link")) {
+            if (Object.hasOwn(change.value, "photo")) {
+                embed.setImage(change.value.photo);
+            } else if (Object.hasOwn(change.value, "link")) {
                 embed.setImage(change.value.link);
             } else if (Object.hasOwn(change.value, "photos")) {
                 // Only show first image
