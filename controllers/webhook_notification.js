@@ -24,8 +24,6 @@ const webhook_notification = (req, res) => {
     // Might be better if Macky won't ever be added to other servers
     const channel = req.discord_client.channels.cache.get(process.env.CHANNEL_ID);
 
-    // TODO: Verify SHA256 signature in payload
-
     // Status response code
     let status = 200;
 
@@ -34,23 +32,28 @@ const webhook_notification = (req, res) => {
     search: for (let entry of entries) {
         // Iterate over each change
         for (let change of entry.changes) {
-            // Only accept "feed" updates
-            if (change.field != "feed") {
+            // Only accept "feed" updates with item "status" or "photo" and verb "add"
+            if (change.field != "feed"
+                || (change.value.item != "status" && change.value.item != "photo")
+                || change.value.verb != "add") {
                 console.log(
-                    `[Webhooks] Error: attempted to parse "${change.field}" update`
+                    `[Webhooks] Skipping parsing of "${change.field}" update at https://facebook.com/${change.value.post_id}`
                 );
-                status = 400;
+                status = 200;
                 break search;
             }
 
             // Embed
             let embed = new EmbedBuilder()
-                .setTitle(`${change.value.from.name} made a new post`)
+                .setTitle(`La Salle Computer Society on Facebook`)
                 .setURL(`https://facebook.com/${change.value.post_id}`)
+                .setThumbnail("https://i.imgur.com/jVdfC7o.png")
+                .setColor("#abd8ff")
                 .setFooter({
                     text: new Date(entry.time * 1000).toLocaleTimeString(
                         process.env.TIME_LOCALE
-                    ),
+                    ) + "\n39th La Salle Computer Society Research and Development",
+                    iconURL: "https://i.imgur.com/rrvsq8o.png",
                 });
 
             // Set description iff message field exists
@@ -59,7 +62,9 @@ const webhook_notification = (req, res) => {
             }
 
             // The field for one image and multiple images in the requests are different
-            if (Object.hasOwn(change.value, "link")) {
+            if (Object.hasOwn(change.value, "photo")) {
+                embed.setImage(change.value.photo);
+            } else if (Object.hasOwn(change.value, "link")) {
                 embed.setImage(change.value.link);
             } else if (Object.hasOwn(change.value, "photos")) {
                 // Only show first image
@@ -72,6 +77,7 @@ const webhook_notification = (req, res) => {
 
             // Send the message
             channel.send({
+                content: "@everyone",
                 embeds: [embed],
             });
         }
