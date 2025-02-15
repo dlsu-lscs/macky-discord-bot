@@ -4,6 +4,11 @@
 
 Macky was created to automate administrating discord servers. This includes verifying LSCS members, and labeling the appropriate officer role.
 
-## Set-up
+# Installation
+The required node version is v20.17. Install the runtime [here](https://nodejs.org/download/release/v20.17.0/).
 
-- Node version v20.17 [[text](https://nodejs.org/download/release/v20.17.0/)]
+Initialize the node modules with: `npm i`.
+
+Fill out the `.env` file with the required bot values.
+
+Run the application with node: `node app`.
