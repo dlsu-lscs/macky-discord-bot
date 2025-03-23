@@ -2,22 +2,23 @@ const { EmbedBuilder } = require("discord.js");
 const get_reddit_posts = require("../utils/get_reddit_posts");
 
 const check_reddit = async (bot) => {
-    console.log(bot.channels.cache);
     const channel = bot.channels.cache.get(process.env.CHANNEL_ID_REDDIT);
 
-    const posts = await get_reddit_posts(5);
+    const posts = await get_reddit_posts(process.env.REDDIT_INTERVAL_MINS);
     console.log(posts);
 
     for (let post of posts) {
         let embed = new EmbedBuilder()
-            .setTitle(post.title)
+            .setTitle(`r/${process.env.SUBREDDIT_NAME}: ${post.title}`)
             .setURL(post.link)
             .setThumbnail("https://i.imgur.com/jVdfC7o.png")
             .setColor("#abd8ff")
             .setFooter({
                 text:
-                    `Posted by u/${post.author} on r/${process.env.SUBREDDIT_NAME}` +
-                    new Date(post.created).toLocaleTimeString(process.env.TIME_LOCALE) +
+                    `Posted by u/${post.author} at ` +
+                    new Date(post.created * 1000).toLocaleTimeString(process.env.TIMESTAMP_LOCALE, {
+                        timeZone: "Asia/Brunei",
+                    }) +
                     "\n39th La Salle Computer Society Research and Development",
                 iconURL: "https://i.imgur.com/rrvsq8o.png",
             });
@@ -34,7 +35,7 @@ const check_reddit = async (bot) => {
 
         // TODO: Multiple images, not sure what that looks like
         channel.send({
-            content: "Test",
+            // content: {something here},
             embeds: [embed],
         });
     }

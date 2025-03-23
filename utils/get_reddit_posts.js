@@ -34,8 +34,7 @@ const get_reddit_posts = async (minutes) => {
                 return {
                     title: x.data.title,
                     author: x.data.author,
-
-                    created: x.created_utc,
+                    created: x.data.created_utc,
                     link: "https://reddit.com" + x.data.permalink,
                     ...(x.data.post_hint == "image" && { image: x.data.url }),
                     ...(x.data.selftext && {
@@ -43,7 +42,7 @@ const get_reddit_posts = async (minutes) => {
                             remove_md(x.data.selftext)
                                 .replace(/https?:\/\/\S+/g, "")
                                 .trim(),
-                            60
+                            100
                         ),
                     }),
                 };
