@@ -1,5 +1,12 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
+
+const {
+    Client,
+    GatewayIntentBits,
+    Partials,
+    Collection,
+} = require("discord.js");
+
 const bot = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -9,24 +16,37 @@ const bot = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessageReactions,
     ],
-    partials: [Partials.Message, Partials.Channel, Partials.User, Partials.Reaction, Partials.GuildMember],
+    partials: [
+        Partials.Message,
+        Partials.Channel,
+        Partials.User,
+        Partials.Reaction,
+        Partials.GuildMember,
+    ],
 });
+
 const fs = require("fs");
 const check_reddit = require("./controllers/check_reddit");
 
 bot.commands = new Collection();
 
-const commandFiles = fs.readdirSync("./commands/").filter((f) => f.endsWith(".js"));
+const commandFiles = fs
+    .readdirSync("./commands/")
+    .filter((f) => f.endsWith(".js"));
 for (const file of commandFiles) {
     const props = require(`./commands/${file}`);
     console.log(`command ${file} loaded`);
     bot.commands.set(props.config.name, props);
 }
 
-const commandSubFolders = fs.readdirSync("./commands/").filter((f) => !f.endsWith(".js"));
+const commandSubFolders = fs
+    .readdirSync("./commands/")
+    .filter((f) => !f.endsWith(".js"));
 
 commandSubFolders.forEach((folder) => {
-    const commandFiles = fs.readdirSync(`./commands/${folder}/`).filter((f) => f.endsWith(".js"));
+    const commandFiles = fs
+        .readdirSync(`./commands/${folder}/`)
+        .filter((f) => f.endsWith(".js"));
     for (const file of commandFiles) {
         const props = require(`./commands/${folder}/${file}`);
         console.log(`${file} loaded from ${folder}`);
