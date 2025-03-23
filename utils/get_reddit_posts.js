@@ -2,14 +2,6 @@ const remove_md = require("remove-markdown");
 
 const curtime = Date.now() / 1000;
 
-const truncate = (string, max) => {
-    if (string.length > max) {
-        return string.slice(0, max) + "\u2026";
-    } else {
-        return string;
-    }
-};
-
 const get_reddit_posts = async (minutes) => {
     const url = `https://oauth.reddit.com/r/${process.env.SUBREDDIT_NAME}/new`;
 
@@ -38,12 +30,9 @@ const get_reddit_posts = async (minutes) => {
                     link: "https://reddit.com" + x.data.permalink,
                     ...(x.data.post_hint == "image" && { image: x.data.url }),
                     ...(x.data.selftext && {
-                        content: truncate(
-                            remove_md(x.data.selftext)
-                                .replace(/https?:\/\/\S+/g, "")
-                                .trim(),
-                            100
-                        ),
+                        content: remove_md(x.data.selftext)
+                            .replace(/https?:\/\/\S+/g, "")
+                            .trim(),
                     }),
                 };
             });

@@ -34,10 +34,15 @@ const check_reddit = async (bot) => {
         }
 
         // TODO: Multiple images, not sure what that looks like
-        channel.send({
-            // content: {something here},
-            embeds: [embed],
-        });
+        channel
+            .send({
+                // content: {something here},
+                embeds: [embed],
+            })
+            .then((message) => {
+                message.react("⬆️");
+                message.react("⬇️");
+            });
     }
 };
 
