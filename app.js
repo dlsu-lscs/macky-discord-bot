@@ -26,7 +26,6 @@ const bot = new Client({
 });
 
 const fs = require("fs");
-const check_reddit = require("./controllers/check_reddit");
 
 bot.commands = new Collection();
 
