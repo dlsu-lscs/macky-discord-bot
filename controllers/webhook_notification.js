@@ -33,9 +33,11 @@ const webhook_notification = (req, res) => {
         // Iterate over each change
         for (let change of entry.changes) {
             // Only accept "feed" updates with item "status" or "photo" and verb "add"
-            if (change.field != "feed"
-                || (change.value.item != "status" && change.value.item != "photo")
-                || change.value.verb != "add") {
+            if (
+                change.field != "feed" ||
+                (change.value.item != "status" && change.value.item != "photo") ||
+                change.value.verb != "add"
+            ) {
                 console.log(
                     `[Webhooks] Skipping parsing of "${change.field}" update at https://facebook.com/${change.value.post_id}`
                 );
@@ -50,9 +52,10 @@ const webhook_notification = (req, res) => {
                 .setThumbnail("https://i.imgur.com/jVdfC7o.png")
                 .setColor("#abd8ff")
                 .setFooter({
-                    text: new Date(entry.time * 1000).toLocaleTimeString(
-                        process.env.TIME_LOCALE
-                    ) + "\n39th La Salle Computer Society Research and Development",
+                    text:
+                        new Date(entry.time * 1000).toLocaleTimeString(process.env.TIMESTAMP_LOCALE, {
+                            timeZone: "Asia/Brunei",
+                        }) + "\n39th La Salle Computer Society Research and Development",
                     iconURL: "https://i.imgur.com/rrvsq8o.png",
                 });
 
@@ -71,9 +74,7 @@ const webhook_notification = (req, res) => {
                 embed.setImage(change.value.photos[0]);
             }
 
-            console.log(
-                `[Webhooks] Received "${change.field}" update (https://facebook.com/${entry.id})`
-            );
+            console.log(`[Webhooks] Received "${change.field}" update (https://facebook.com/${entry.id})`);
 
             // Send the message
             channel.send({
