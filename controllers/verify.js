@@ -26,7 +26,7 @@ const verify = async (req, res) => {
 
     const [result] = await mysql.query
       (`
-      SELECT m.email, m.nickname, m.position_id, p.position_name, c.committee_id, c.committee_name, d.division_id
+      SELECT m.email, m.nickname, m.full_name, m.position_id, p.position_name, c.committee_id, c.committee_name, d.division_id
       FROM members m 
       JOIN positions  p ON m.position_id  = p.position_id
       JOIN committees c ON m.committee_id = c.committee_id
