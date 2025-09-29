@@ -89,7 +89,7 @@ const verify = async (req, res) => {
     }
     await member.roles.add(role);
 
-    const displayName = memberData.nickname.length < 2 ? memberData.full_name : memberData.nickname
+    const displayName = memberData.full_name
 
     const embed = new EmbedBuilder()
       .setTitle(`Welcome to LSCScord, ${displayName}!`)
