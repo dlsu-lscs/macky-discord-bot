@@ -89,8 +89,10 @@ const verify = async (req, res) => {
     }
     await member.roles.add(role);
 
+    const displayName = memberData.nickname.length < 2 ? memberData.full_name : memberData.nickname
+
     const embed = new EmbedBuilder()
-      .setTitle(`Welcome to LSCScord, ${memberData.nickname}!`)
+      .setTitle(`Welcome to LSCScord, ${displayName}!`)
       .setDescription(`Cheers to a fruitful year as ${isVowel(memberData.position_name[0]) ? "an" : "a"} ${memberData.position_name} in ${memberData.committee_name}!`)
       .setThumbnail("https://i.imgur.com/jVdfC7o.png")
       .setColor("#abd8ff")
